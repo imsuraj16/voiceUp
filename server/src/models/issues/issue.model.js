@@ -72,6 +72,7 @@ const issueSchema = new mongoose.Schema(
 );
 
 issueSchema.index({ location: "2dsphere" });
+issueSchema.index({title : 'text'})
 
 const issueModel = mongoose.model("issue", issueSchema);
 

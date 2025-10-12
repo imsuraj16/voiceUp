@@ -1,6 +1,6 @@
 const express = require("express");
 const createAuthMiddleware = require("../middlewares/auth.middleware");
-const { addIssue } = require("../controller/issue.controller");
+const { addIssue, listIssues } = require("../controller/issue.controller");
 const multer = require("multer");
 const { issueValidation } = require("../middlewares/validators/issue.validator");
 
@@ -8,6 +8,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
+
+// GET /api/issues - List issues with filters
+router.get("/", listIssues);
 
 // POST /api/issues - Create a new issue
 router.post(
