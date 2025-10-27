@@ -123,7 +123,52 @@ const listIssues = async (req, res) => {
   }
 };
 
+
+//update issue
+const updateIssues = async(req,res)=>{
+
+  const{issueId} = req.params;
+  const userId = req.user._id;
+  
+  if(!userId){
+    return res.status(401).json({message:"Unauthorized"});
+  }
+
+  const { title, description, category, location, address, status } = req.body;
+
+  if(!issueId){
+    return res.status(400).json({message:"Issue ID is required"});
+  }
+
+
+  const updateIssue = await issueModel.findOneAndUpdate({
+    _id : issueId,
+    reporterId : userId
+  },{
+    title,
+    description,
+    category,
+    location,
+    address,
+    status
+  },{
+    new : true,
+  })
+
+  if(!updateIssue){
+    return res.status(404).json({message:"Issue not found or you are not authorized to update this issue"});
+  }
+
+  return res.status(200).json({
+    message : "Issue updated successfully",
+    issue : updateIssue
+  })
+
+}
+
+
 module.exports = {
   addIssue,
   listIssues,
+  updateIssues
 };
