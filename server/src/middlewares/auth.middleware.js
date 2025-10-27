@@ -1,3 +1,4 @@
+const config = require("../config/config");
 const userModel = require("../models/user/user.model");
 const jwt = require("jsonwebtoken");
 
@@ -10,7 +11,7 @@ function createAuthMiddleware(roles = ["user"]) {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      const decoded = jwt.verify(accessToken, config.JWT_ACCESS_SECRET);
 
       const user = await userModel.findById(decoded.id);
       if (!roles.includes(user.role)) {
