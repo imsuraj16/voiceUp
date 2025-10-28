@@ -123,52 +123,60 @@ const listIssues = async (req, res) => {
   }
 };
 
-
 //update issue
-const updateIssues = async(req,res)=>{
-
-  const{issueId} = req.params;
+const updateIssues = async (req, res) => {
+  const { issueId } = req.params;
   const userId = req.user._id;
+  console.log(req.user);
   
-  if(!userId){
-    return res.status(401).json({message:"Unauthorized"});
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  const { title, description, category, location, address, status } = req.body || {};
+
+  if (!issueId) {
+    return res.status(400).json({ message: "Issue ID is required" });
   }
 
-  const { title, description, category, location, address, status } = req.body;
+  let filter = { _id: issueId };
 
-  if(!issueId){
-    return res.status(400).json({message:"Issue ID is required"});
+  if (req.user.role === "user") {
+    filter.reporterId = userId;
   }
 
+  const updateIssue = await issueModel.findOneAndUpdate(
+    {
+      ...filter,
+    },
+    {
+      title,
+      description,
+      category,
+      location,
+      address,
+      status,
+    },
+    {
+      new: true,
+    }
+  );
 
-  const updateIssue = await issueModel.findOneAndUpdate({
-    _id : issueId,
-    reporterId : userId
-  },{
-    title,
-    description,
-    category,
-    location,
-    address,
-    status
-  },{
-    new : true,
-  })
-
-  if(!updateIssue){
-    return res.status(404).json({message:"Issue not found or you are not authorized to update this issue"});
+  if (!updateIssue) {
+    return res.status(404).json({
+      message: "Issue not found or you are not authorized to update this issue",
+    });
   }
 
   return res.status(200).json({
-    message : "Issue updated successfully",
-    issue : updateIssue
-  })
-
-}
-
+    message: "Issue updated successfully",
+    issue: updateIssue,
+  });
+};
 
 module.exports = {
   addIssue,
   listIssues,
-  updateIssues
+  updateIssues,
 };
