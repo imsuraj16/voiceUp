@@ -4,7 +4,7 @@ const sanitizehtml = require("sanitize-html");
 // Middleware to coerce lat/lng into location object for validation
 function coerceLocation(req, _res, next) {
   if (
-    !req.body.location &&
+    // !req.body.location &&
     req.body.lng !== undefined &&
     req.body.lat !== undefined
   ) {
@@ -19,9 +19,27 @@ function coerceLocation(req, _res, next) {
 
 const validateIssue = (req, res, next) => {
   const errors = validationResult(req);
+
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    const errorList = errors.array();
+
+    // Check agar koi "is required" type error hai
+    const hasMissingField = errorList.some(
+      (err) =>
+        err.msg.toLowerCase().includes("required") ||
+        err.msg.toLowerCase().includes("invalid category") ||
+        err.msg.toLowerCase().includes("invalid issue id")
+    );
+
+    // Agar required field missing hai -> 400
+    if (hasMissingField) {
+      return res.status(400).json({ errors: errorList });
+    }
+
+    // Warna invalid data (enum, location shape, etc.) -> 422
+    return res.status(422).json({ errors: errorList });
   }
+
   next();
 };
 
